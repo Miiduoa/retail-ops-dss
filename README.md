@@ -45,7 +45,7 @@ English: A lightweight retail operations decision-support prototype — daily sa
 ## 如何執行
 
 ```bash
-git clone https://github.com/USERNAME/retail-ops-dss.git
+git clone https://github.com/Miiduoa/retail-ops-dss.git
 cd retail-ops-dss
 
 python -m venv .venv
@@ -101,7 +101,7 @@ retail-ops-dss/
 
 ## 限制（誠實）
 
-- 資料為合成情境，未涵蓋實際供应链延遲、競品、天候等  
+- 資料為合成情境，未涵蓋實際供應鏈延遲、競品、天候等  
 - 多步預測採遞迴方式，誤差可能隨 horizon 累積  
 - 補貨／人力建議為規則引擎示意，非 OR 最佳化  
 - 未串接真實 POS／ERP，僅供學習與展示  
