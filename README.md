@@ -1,5 +1,7 @@
 # Retail Ops DSS｜零售營運決策支援原型
 
+[![verify](https://github.com/Miiduoa/retail-ops-dss/actions/workflows/verify.yml/badge.svg)](https://github.com/Miiduoa/retail-ops-dss/actions/workflows/verify.yml)
+
 **預測＋可解釋儀表板** — 個人作品（非課內專題題目）｜MIT License
 
 English: A lightweight retail operations decision-support prototype — daily sales forecasting, feature importance, and rule-based replenishment / staffing suggestions in Streamlit.
