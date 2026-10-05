@@ -1,0 +1,25 @@
+name: verify
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: retail-ops-verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dss:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - run: pip install -r requirements.txt
+      - run: python generate_data.py
+      - run: python scripts_verify.py
