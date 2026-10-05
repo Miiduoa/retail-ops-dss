@@ -14,6 +14,21 @@ English: A lightweight retail operations decision-support prototype — daily sa
 
 連鎖零售門市在補貨與排班上常依賴經驗法則，面對促銷、假日與品類差異時，容易出現**缺貨或過剩**、**尖峰人力不足**。本專案建構可 Demo 的決策支援系統（DSS）原型：以日銷量預測為核心，搭配可解釋資訊與規則型建議，協助管理者快速掌握「會賣多少、為什麼、該怎麼做」。
 
+敏感營運動作（庫存調整、補貨核准、設定與帳號變更）另以**應用層授權與稽核**關進可課責流程：不是任何人打開儀表板就能改數、也不是「有登入就等於什麼都能做」。
+
+## 趨勢對齊（書審／面試可講）
+
+本節對齊常見的資安／治理方向：**零信任精神的最小權限、可觀測稽核、資料範圍隔離、把存取風險接到 DSS 決策**。這是作品展示用的**應用層控制平面**（Streamlit session + SQLite），**不是**企業零信任網關、IdP、mTLS、EDR，也**沒有**做滲透測試、漏洞掃描或攻擊模擬。
+
+| 趨勢方向 | 本原型實際做了什麼 | 請不要過度解讀 |
+|----------|-------------------|----------------|
+| 零信任／細粒度授權 | 授權看「資源＋動作」（如 `inventory.write`、`reorder.approve`、`settings.admin`），**未列即預設拒絕**；敏感操作要求較高信任條件（近期再驗證，或僅管理者工作階段） | 沒有裝置憑證、網路微隔離、持續裝置健康評分 |
+| 操作稽核可觀測 | 追加寫入、不可 UPDATE/DELETE；可篩選、可匯出 CSV。欄位含 actor、action、resource、outcome、timestamp、request_id／correlation_id | 不是 SIEM／SOC 產品，也不是異常偵測專題 |
+| 資料範圍（store scope） | 同一 `operator` 角色仍只能看／改被指派門市；跨店在政策層拒絕並寫稽核 | 合成資料上的邏輯隔離，非正式資料庫 RLS 產品 |
+| 決策支援 × 存取風險 | 補貨／庫存等動作標示高影響、非營業時間、跨店（相對主店），提示與稽核同一套旗標 | 可解釋的營運規則，不是 ML 風險分數或威脅情報 |
+
+面試可用的一句話：預測建議仍要經過「你有沒有這個動作的權限、能不能碰這家門市、這筆為什麼比較敏感、事後誰做成或被拒」才進入營運閉環。
+
 ## 截圖
 
 | 資料概覽 | 預測與建議 |
@@ -58,7 +73,25 @@ python generate_data.py            # 產生／覆寫合成資料
 streamlit run app.py
 ```
 
-瀏覽器開啟終端機提示的本機網址（預設 `http://localhost:8501`）。
+瀏覽器開啟終端機提示的本機網址（預設 `http://localhost:8501`）。首次啟動會種子合成帳號與空的稽核庫（`data/ops_control.db`，不進版控）。
+
+### Demo 帳號（合成，非正式憑證）
+
+| 帳號 | 密碼 | 角色 | 資料範圍 | 適合演示 |
+|------|------|------|----------|----------|
+| `operator.s01` | `demo-op-s01` | 門市營運 | 僅 S01 台北信義店 | 單店隔離、補貨／庫存 |
+| `operator.north` | `demo-op-north` | 門市營運 | S01、S04（北區） | 同角色、不同範圍；對 S04 核准會標「跨店」 |
+| `operator.s03` | `demo-op-s03` | 門市營運 | 僅 S03 高雄夢時代店 | 與 S01 對照，互不可見 |
+| `viewer.s02` | `demo-view-s02` | 檢視者 | 僅 S02 台中逢甲店 | 預設拒絕寫入／核准 |
+| `admin` | `demo-admin-2026` | 系統管理者 | 全門市（`*`） | 稽核儀表、匯出、帳號與設定 |
+
+側欄可快速填入帳號。高影響數量或政策設定會要求**再輸入密碼**（預設 5 分鐘內有效）。側欄「Demo：模擬非營業時間」只為讓面試不必等到晚上也能看到風險旗標。
+
+### 三分鐘操作路徑
+
+1. `streamlit run app.py`，用 `operator.s01` 登入 → 預測頁只能選信義店 → 提出或核准補貨，看「存取風險」。
+2. 勾選「模擬非營業時間」再操作一次；必要時用同一密碼再驗證。換 `operator.s03` 確認看不到信義店。
+3. 用 `admin` 開「操作稽核」：看近 24h 拒絕與敏感成功、篩選、匯出 CSV。再用 `viewer.s02` 嘗試核准，應被拒絕並入稽核。
 
 ### 快速驗證（非互動）
 
@@ -71,11 +104,14 @@ python -c "from src.data_loader import load_sales; from src.models import get_or
 
 ## 介面功能
 
-| 頁面 | 內容 |
-|------|------|
-| 資料概覽 | 資料規模、全通路趨勢、品類結構 |
-| 預測與決策建議 | 選門市／品類、未來 N 日預測、補貨／人力建議、特徵重要性、類似歷史日 |
-| 模型評估對照 | MA-7 vs RandomForest 的 MAE／MAPE |
+| 頁面 | 內容 | 誰看得到 |
+|------|------|----------|
+| 資料概覽 | 資料規模、可見範圍趨勢、品類結構 | 有 `dashboard.read` 且僅自己的門市列 |
+| 預測與決策建議 | 選門市／品類、未來 N 日預測、補貨／人力建議、**存取風險**、提出／核准補貨 | 門市清單已過濾；寫入另要 `reorder.*` |
+| 庫存與補貨作業 | 庫存調整、補貨單核准／駁回 | 敏感動作可要求再驗證 |
+| 模型評估對照 | MA-7 vs RandomForest 的 MAE／MAPE | `eval.read` |
+| 操作稽核 | 篩選、失敗授權、敏感成功、匯出 CSV | `audit.read`／`audit.export`（管理者） |
+| 帳號與設定 | 角色、門市範圍、高影響門檻、營業時段 | `user.admin`／`settings.admin`（僅管理者工作階段） |
 
 ## 目錄結構
 
@@ -83,18 +119,22 @@ python -c "from src.data_loader import load_sales; from src.models import get_or
 retail-ops-dss/
 ├── app.py                 # Streamlit 入口
 ├── generate_data.py       # 合成資料一鍵產生
-├── scripts_verify.py      # 非互動驗證
+├── scripts_verify.py      # 非互動驗證（含授權／稽核測試）
 ├── requirements.txt
 ├── LICENSE                # MIT
 ├── README.md
-├── data/                  # CSV（generate 後產生）
+├── data/                  # CSV；ops_control.db 於本機種子
 ├── models/                # 模型快取（.gitkeep；*.joblib 不進版控）
 ├── src/
 │   ├── data_loader.py
 │   ├── features.py
 │   ├── models.py
 │   ├── explain.py
-│   └── recommend.py
+│   ├── recommend.py
+│   ├── ui_security.py     # 登入、風險、作業／稽核／設定頁
+│   └── access/            # 政策引擎、稽核、種子帳號
+├── tests/
+│   └── test_access_control.py
 └── docs/
     ├── 備審專題說明.md
     ├── 架構說明.md
@@ -107,6 +147,8 @@ retail-ops-dss/
 - 多步預測採遞迴方式，誤差可能隨 horizon 累積  
 - 補貨／人力建議為規則引擎示意，非 OR 最佳化  
 - 未串接真實 POS／ERP，僅供學習與展示  
+- 授權與稽核是**應用層 Demo**（本機 SQLite、合成密碼雜湊、Streamlit 工作階段），不能當成已上線的零信任或資安認證證據  
+- 不含滲透測試、攻擊手法、漏洞利用或網路攻擊防護產品功能  
 
 ## 授權
 
