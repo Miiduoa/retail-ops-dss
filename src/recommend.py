@@ -6,6 +6,18 @@ from __future__ import annotations
 import pandas as pd
 
 
+def replenishment_need(
+    forecast: pd.DataFrame,
+    recent_inventory: float,
+    lead_time_days: int = 2,
+    service_buffer: float = 0.20,
+) -> tuple[float, float]:
+    """回傳 (建議備貨量 need, 缺口 gap)。gap>0 表示應補貨。"""
+    need = float(forecast["pred_rf"].head(lead_time_days + 3).sum()) * (1 + service_buffer)
+    gap = need - float(recent_inventory)
+    return need, gap
+
+
 def replenishment_advice(
     forecast: pd.DataFrame,
     recent_inventory: float,
@@ -13,8 +25,9 @@ def replenishment_advice(
     service_buffer: float = 0.20,
 ) -> str:
     """補貨建議：涵蓋 lead_time + 緩衝。"""
-    need = float(forecast["pred_rf"].head(lead_time_days + 3).sum()) * (1 + service_buffer)
-    gap = need - recent_inventory
+    need, gap = replenishment_need(
+        forecast, recent_inventory, lead_time_days, service_buffer
+    )
     avg_daily = float(forecast["pred_rf"].mean())
     peak = float(forecast["pred_rf"].max())
     peak_day = str(forecast.loc[forecast["pred_rf"].idxmax(), "date"])[:10]

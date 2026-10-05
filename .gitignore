@@ -15,6 +15,11 @@ build/
 models/*
 !models/.gitkeep
 
+# Local control-plane DB (seeded on first run)
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
 # Streamlit
 .streamlit/secrets.toml
 
