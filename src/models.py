@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+import zlib
 
 import joblib
 import numpy as np
@@ -13,7 +13,13 @@ import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error
 
-from .features import FEATURE_COLS, add_features, prepare_xy
+from .features import (
+    FEATURE_COLS,
+    add_features,
+    apply_feature_imputer,
+    fit_feature_imputer,
+    prepare_xy,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "models"
@@ -39,7 +45,7 @@ def mape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
 
 
 def time_split(df: pd.DataFrame, test_days: int = 60):
-    """依全域最後 test_days 天切分訓練／測試（避免未來洩漏）。"""
+    """依全域最後 test_days 天切分訓練／測試。"""
     max_date = df["date"].max()
     cut = max_date - pd.Timedelta(days=test_days - 1)
     train = df[df["date"] < cut].copy()
@@ -63,19 +69,14 @@ class MovingAverageBaseline:
 
     def predict_frame(self, df: pd.DataFrame) -> np.ndarray:
         preds = []
-        # 逐列用當下可用的歷史（測試集用訓練末段 + 已見測試）
+        # rolling one-step-ahead：每一天只使用當日前已觀測到的歷史實績。
         history = {k: list(v) for k, v in self.last_values_.items()}
         for _, row in df.sort_values("date").iterrows():
             key = (row["store_id"], row["category_id"])
             hist = history.get(key, [])
-            if len(hist) == 0:
-                pred = 0.0
-            else:
-                pred = float(np.mean(hist[-self.window :]))
+            pred = float(np.mean(hist[-self.window :])) if hist else 0.0
             preds.append(pred)
-            hist = hist + [float(row["sales_qty"])]
-            history[key] = hist[-self.window :]
-        # 對齊原始 df 順序
+            history[key] = (hist + [float(row["sales_qty"])])[-self.window :]
         order = df.sort_values("date").index
         series = pd.Series(preds, index=order)
         return series.reindex(df.index).to_numpy()
@@ -100,8 +101,12 @@ class DemandForecaster:
         self.history_df_: pd.DataFrame | None = None
 
     def fit_eval(self, df_raw: pd.DataFrame, test_days: int = 60) -> list[EvalResult]:
-        df_feat = add_features(df_raw)
-        train, test = time_split(df_feat, test_days=test_days)
+        # 先建立未填補的特徵，再時間切分；缺值統計只由訓練區間估計。
+        df_feat_raw = add_features(df_raw, impute=False)
+        train_raw, test_raw = time_split(df_feat_raw, test_days=test_days)
+        imputer = fit_feature_imputer(train_raw)
+        train = apply_feature_imputer(train_raw, imputer)
+        test = apply_feature_imputer(test_raw, imputer)
 
         # Baseline
         self.baseline.fit(train)
@@ -124,19 +129,18 @@ class DemandForecaster:
         ]
         self.feature_importance_ = (
             pd.DataFrame(
-                {
-                    "feature": self.feature_names_,
-                    "importance": self.model.feature_importances_,
-                }
+                {"feature": self.feature_names_, "importance": self.model.feature_importances_}
             )
             .sort_values("importance", ascending=False)
             .reset_index(drop=True)
         )
-        # 全量再 fit，供預測使用
-        X_all, y_all = prepare_xy(df_feat)
+
+        # 評估完成後以所有已知歷史重新 fit，供實際未來預測使用。
+        df_feat_full = add_features(df_raw, impute=True)
+        X_all, y_all = prepare_xy(df_feat_full)
         self.model.fit(X_all, y_all)
-        self.baseline.fit(df_feat)
-        self.history_df_ = df_feat.copy()
+        self.baseline.fit(df_feat_full)
+        self.history_df_ = df_feat_full.copy()
         self.trained_ = True
         return self.eval_results_
 
@@ -159,7 +163,8 @@ class DemandForecaster:
             raise ValueError("找不到該門市／品類資料")
 
         last = hist.iloc[-1]
-        rng = np.random.default_rng(abs(hash((store_id, category_id))) % (2**32))
+        stable_seed = zlib.crc32(f"{store_id}|{category_id}".encode("utf-8"))
+        rng = np.random.default_rng(stable_seed)
         cur = hist.copy()
         rows = []
         last_date = pd.Timestamp(last["date"])
@@ -168,7 +173,6 @@ class DemandForecaster:
             d = last_date + pd.Timedelta(days=step)
             dow = d.weekday()
             is_promo = int(rng.random() < future_promo_rate)
-            # 價格沿用近期均值，促銷時折扣
             base_price = float(hist["unit_price"].tail(14).mean())
             unit_price = base_price * (0.85 if is_promo else 1.0)
             is_holiday = int(dow >= 5)  # 簡化：週末視為高需求日
@@ -180,7 +184,7 @@ class DemandForecaster:
                 "region": last["region"],
                 "category_id": category_id,
                 "category_name": last["category_name"],
-                "sales_qty": np.nan,  # 待填
+                "sales_qty": np.nan,
                 "unit_price": unit_price,
                 "is_promo": is_promo,
                 "is_holiday": is_holiday,
@@ -191,10 +195,8 @@ class DemandForecaster:
             tmp = pd.concat([cur, pd.DataFrame([new_row])], ignore_index=True)
             tmp = add_features(tmp)
             feat_row = tmp.iloc[[-1]][FEATURE_COLS].astype(float)
-            pred = float(self.model.predict(feat_row)[0])
-            pred = max(0.0, pred)
+            pred = max(0.0, float(self.model.predict(feat_row)[0]))
 
-            # MA baseline 對照
             ma_hist = cur["sales_qty"].dropna().tolist()
             ma_pred = float(np.mean(ma_hist[-7:])) if ma_hist else 0.0
 
@@ -210,7 +212,6 @@ class DemandForecaster:
                     "day_of_week": dow,
                 }
             )
-            # 回填預測值供下一步特徵
             tmp.loc[tmp.index[-1], "sales_qty"] = pred
             cur = tmp
 
