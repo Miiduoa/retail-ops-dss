@@ -57,7 +57,13 @@ def render_login(cp: ControlPlane) -> Principal | None:
     )
     picked = next(a for a in DEMO_ACCOUNTS if a["username"] == pick)
     username = st.sidebar.text_input("帳號", value=picked["username"])
-    password = st.sidebar.text_input("密碼", type="password", placeholder=picked["password"])
+    password = st.sidebar.text_input(
+        "密碼",
+        type="password",
+        value=picked["password"],
+        key=f"login_pw_{picked['username']}",
+        help="合成 Demo 密碼已預填，非正式憑證。",
+    )
     st.sidebar.caption("密碼見 README「Demo 帳號」；僅供作品展示，非正式憑證。")
     if st.sidebar.button("登入", type="primary"):
         principal, err = cp.authenticate(
@@ -82,7 +88,7 @@ def render_identity(cp: ControlPlane, principal: Principal) -> None:
         f"{principal.username} · {principal.role_label} · 主店 {principal.home_store_id or '—'}"
     )
     if principal.sees_all_stores:
-        st.sidebar.caption("資料範圍：全門市（`*`）")
+        st.sidebar.caption("資料範圍：全門市（全部）")
     else:
         st.sidebar.caption("資料範圍：" + "、".join(sorted(principal.store_scope)))
     stepup_ok = principal.stepup_is_fresh(
@@ -90,8 +96,10 @@ def render_identity(cp: ControlPlane, principal: Principal) -> None:
         timedelta(minutes=cp.load_settings().stepup_minutes),
     )
     st.sidebar.caption(
-        "工作階段信任：已再驗證" if stepup_ok else "工作階段信任：標準（敏感操作需再驗證）"
+        "工作階段信任：已再驗證" if stepup_ok else "工作階段信任：標準"
     )
+    if not stepup_ok:
+        st.sidebar.caption("敏感操作需再驗證")
     st.session_state.simulate_after_hours = st.sidebar.checkbox(
         "Demo：模擬非營業時間",
         value=st.session_state.get("simulate_after_hours", False),
@@ -241,13 +249,42 @@ def page_ops(
         recent = cp.list_adjustments(allowed if not principal.sees_all_stores else None)
         if recent:
             st.caption("最近庫存調整")
-            st.dataframe(pd.DataFrame(recent).head(15), hide_index=True, use_container_width=True)
+            adj_df = pd.DataFrame(recent).head(15)
+            adj_df = adj_df.rename(
+                columns={
+                    "adj_id": "編號",
+                    "store_id": "門市",
+                    "category_id": "品類",
+                    "delta": "調整量",
+                    "reason": "原因",
+                    "actor_id": "操作者",
+                    "request_id": "request_id",
+                    "created_at": "時間",
+                }
+            )
+            st.dataframe(adj_df, hide_index=True, use_container_width=True)
 
     with c2:
         st.subheader("補貨申請／核准")
         tickets = cp.list_tickets(None if principal.sees_all_stores else allowed)
         if tickets:
-            show = pd.DataFrame(tickets)
+            show = pd.DataFrame(tickets).rename(
+                columns={
+                    "ticket_id": "單號",
+                    "store_id": "門市",
+                    "category_id": "品類",
+                    "recommended_qty": "建議量",
+                    "status": "狀態",
+                    "risk_level": "風險",
+                    "risk_flags": "旗標",
+                    "created_by": "申請人",
+                    "decided_by": "核准人",
+                    "created_at": "建立時間",
+                    "decided_at": "決行時間",
+                    "request_id": "request_id",
+                    "note": "備註",
+                }
+            )
             st.dataframe(show, hide_index=True, use_container_width=True)
             pending = [t for t in tickets if t["status"] == "pending"]
             if pending:

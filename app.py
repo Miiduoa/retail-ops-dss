@@ -157,7 +157,7 @@ def page_forecast(df: pd.DataFrame, fc, cp, principal):
     m3.metric("有效庫存（含調整）", f"{recent_inv:.0f} 件")
 
     st.subheader("決策建議（規則型 DSS）")
-    st.markdown(combined_advice(forecast, recent_inv))
+    st.markdown(combined_advice(forecast, recent_inv).replace("\n", "  \n"))
 
     need, gap = replenishment_need(forecast, recent_inv)
     suggest_qty = max(0, int(round(gap))) if gap > 0 else 0
@@ -166,7 +166,7 @@ def page_forecast(df: pd.DataFrame, fc, cp, principal):
         "本次送出／核准數量",
         min_value=1,
         value=max(suggest_qty, 1),
-        step=10,
+        step=1,
         help="可調高超過高影響門檻（預設 300）以演示再驗證。",
     )
 
