@@ -38,7 +38,7 @@ English: A lightweight retail operations decision-support prototype — daily sa
 1. **特徵**：lag 1/7/14、滾動均值／標準差、星期／週末／假日、促銷、單價、月份  
 2. **Baseline**：7 日移動平均（MA-7）  
 3. **進階**：`RandomForestRegressor`（特徵重要性可解釋）  
-4. **評估**：時間切分最後 60 日；**MAE**、**MAPE**  
+4. **評估**：最後 60 日 chronological hold-out；採 rolling one-step-ahead，僅使用預測日前已觀測歷史；缺值填補統計只由訓練區間估計；指標為 **MAE**、**MAPE**  
 5. **決策**：依預測產生補貨量與人力工時之**規則型文字建議**  
 6. **解釋**：全域特徵重要性＋「類似歷史日」對照  
 
