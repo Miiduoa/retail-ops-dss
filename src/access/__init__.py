@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""應用層授權、資料範圍與操作稽核（非網路滲透／攻擊用途）。"""
+"""應用層授權、資料範圍與操作稽核。"""
 
 from .control import ControlPlane, get_control_plane
 from .policy import (
