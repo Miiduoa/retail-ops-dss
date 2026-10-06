@@ -8,6 +8,25 @@ English: A lightweight retail operations decision-support prototype — daily sa
 
 作者：顧晉瑋（靜宜大學資訊管理學系）｜Contact: demohan513@gmail.com
 
+## 30 秒 Demo 路徑
+
+如果只看一輪，建議依這個順序：
+
+1. **預測頁**：選門市與品類，看 MA-7 baseline 與 Random Forest 預測差異。
+2. **操作補貨**：用 `operator.s01` 提出補貨，觀察 store scope 與敏感操作條件。
+3. **切換帳號**：改用 `viewer.s02` 嘗試寫入，確認預設拒絕。
+4. **稽核頁**：用 `admin` 查看成功／拒絕事件、request id 與匯出紀錄。
+
+| 審查重點 | 直接看 |
+|---|---|
+| 模型方法與時間切分 | 本 README 的「方法」 |
+| 實際介面 | [docs/screenshots](docs/screenshots/) |
+| 存取控制 | `src/access/` |
+| UI 權限與風險提示 | `src/ui_security.py` |
+| 自動驗證 | `scripts_verify.py`、`tests/test_access_control.py` |
+
+這個專案的價值不在「Random Forest 比 baseline 高多少」這一個數字，而是**預測結果如何進入一個有權限、資料範圍與稽核邊界的營運流程**。
+
 ---
 
 ## 問題
