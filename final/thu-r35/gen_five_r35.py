@@ -239,8 +239,8 @@ def bio_paras(why, short=False):
             "我是顧晉瑋，靜宜大學資訊管理學系四年級，預計民國 116 年 6 月畢業。",
             "需求預測用機器學習課的模型。角色和補貨單據用系統分析與設計課的方法整理。",
             RANK,
-            "Retail Ops DSS 是個人作品，固定版本 1535a052。系統分成檢視、門市營運、管理者三種角色；超出帳號授權門市範圍的操作會被擋下並留下紀錄。我寫了 24 項測試，以存取控制為主。",
-            "113 學年度擔任資管系學會活動部部長。114-2 擔任資管三B 副班代。115-1 擔任資管四B 服務股長。",
+            "Retail Ops DSS 是個人作品，固定版本 1535a052。角色權限、門市資料範圍、再驗證和操作紀錄已經寫進原型。我寫了 24 項測試，以存取控制為主；固定版本 2026-10-06 在 GitHub Actions 上驗證通過。",
+            "民國 114 年 12 月取得 ERP 規劃師，證書編號 GP0115533440。113 學年度資管系學會活動部部長。114-2 擔任資管三B 副班代。115-1 擔任資管四B 服務股長。另外參加了臺鐵數據力 2026（民國 115 年）數據資料創意發想競賽（學生組），作品是 RailFlow-DSS 鐵道旅運負荷預測決策支援系統，2026/09 繳交海選企劃。",
             why,
         ]
     return [
@@ -258,7 +258,7 @@ def bio_paras(why, short=False):
         "核准數量 500 的補貨，系統先要求再驗證一次身分，通過才放行。管理者帳號用錯誤密碼登入，會被拒絕並留下紀錄。",
         "我寫了 24 項測試，以存取控制為主。固定版本 2026-10-06 在 GitHub Actions 上驗證通過。畫面、案例和驗證紀錄放在其他有利於審查之資料。",
         "比賽方面，我參加過 Kaggle Playground S6E9（公開分數 0.94540）和 DrivenData 帕金森症挑戰（公開分數 0.5591，指標是 log loss，越低越好）；Kaggriculture 已提交並完成評分。另外參加了臺鐵數據力 2026（民國 115 年）數據資料創意發想競賽（學生組），作品是 RailFlow-DSS 鐵道旅運負荷預測決策支援系統，2026/09 繳交海選企劃。",
-        "113 學年度擔任資管系學會活動部部長，負責規劃活動和跨年級協調。114-2 擔任資管三B 副班代。115-1 擔任資管四B 服務股長。",
+        "113 學年度資管系學會活動部部長，負責規劃活動和跨年級協調。114-2 擔任資管三B 副班代。115-1 擔任資管四B 服務股長。",
         why,
     ]
 
@@ -364,7 +364,7 @@ def other_html(include_works=False):
 <table>
 <tr><th>項目</th><th>內容</th></tr>
 <tr><td class="lbl">程式與系統</td><td>程式語言 98、C 語言程式設計 96、程式設計 94、機器學習 93、系統分析與設計 83</td></tr>
-<tr><td class="lbl">證照</td><td>2025 年 12 月（民國 114 年 12 月）ERP 規劃師，中華企業資源規劃學會，證書編號 GP0115533440</td></tr>
+<tr><td class="lbl">證照</td><td>民國 114 年 12 月取得 ERP 規劃師，中華企業資源規劃學會，證書編號 GP0115533440</td></tr>
 </table>
 {H("比賽參加紀錄")}
 <p>無學術發表。下列為比賽參加紀錄。</p>
@@ -390,9 +390,9 @@ def resume_html():
 <tr><td class="lbl">通訊地址</td><td>402 台中市南區學府路200號14樓之1</td></tr>
 <tr><td class="lbl">學歷</td><td>靜宜大學資訊管理學系四年級，日間部，應屆；預計民國 116 年 6 月畢業</td></tr>
 <tr><td class="lbl">成績</td><td>六學期平均 <span class="num">73.74</span>；班排 <span class="num">19/27</span>、系排 <span class="num">40/59</span>。112 學年度第 2 學期平均 64，其後四學期都在 75 以上，最近兩學期是 78.86 和 77.53；班排名從 30/40 收到 15/27。</td></tr>
-<tr><td class="lbl">作品</td><td>Retail Ops DSS（個人作品，固定版本 1535a052）：角色權限、門市資料範圍、再驗證、操作紀錄</td></tr>
+<tr><td class="lbl">作品</td><td>Retail Ops DSS（個人作品，固定版本 1535a052）：角色權限、門市資料範圍、再驗證、操作紀錄；24 項測試，GitHub Actions 驗證通過</td></tr>
 <tr><td class="lbl">幹部</td><td>113 學年度資管系學會活動部部長；114-2 資管三B 副班代；115-1 資管四B 服務股長</td></tr>
-<tr><td class="lbl">證照</td><td>2025 年 12 月 ERP 規劃師，中華企業資源規劃學會，GP0115533440</td></tr>
+<tr><td class="lbl">證照</td><td>民國 114 年 12 月取得 ERP 規劃師，中華企業資源規劃學會，證書編號 GP0115533440</td></tr>
 <tr><td class="lbl">專長</td><td>應用層存取控制測試與操作紀錄</td></tr>
 <tr><td class="lbl">論文著作</td><td>無</td></tr>
 </table>
@@ -410,7 +410,7 @@ def fcu_ics_sheet():
 <tr><td class="lbl">電話／Email</td><td>0966198826　／　demohan513@gmail.com</td></tr>
 <tr><td class="lbl">通訊地址</td><td>402 台中市南區學府路200號14樓之1</td></tr>
 <tr><td class="lbl">工作、研究、實習</td><td>Retail Ops DSS 個人作品（固定版本 1535a052）：角色權限、門市資料範圍、再驗證、操作紀錄。113 學年度資管系學會活動部部長。</td></tr>
-<tr><td class="lbl">證照</td><td>2025 年 12 月 ERP 規劃師，中華企業資源規劃學會，GP0115533440</td></tr>
+<tr><td class="lbl">證照</td><td>民國 114 年 12 月取得 ERP 規劃師，中華企業資源規劃學會，證書編號 GP0115533440</td></tr>
 <tr><td class="lbl">專長與研究方向</td><td>應用層存取控制測試與操作紀錄</td></tr>
 <tr><td class="lbl">論文著作</td><td>無</td></tr>
 </table>
@@ -446,9 +446,9 @@ def fcu_cs_form():
 {H("五、其他專業表現與相關特殊專長")}
 <table>
 <tr><th>類別</th><th>名稱</th></tr>
-<tr><td class="lbl">證照</td><td>2025 年 12 月 ERP 規劃師，中華企業資源規劃學會，GP0115533440</td></tr>
+<tr><td class="lbl">證照</td><td>民國 114 年 12 月取得 ERP 規劃師，中華企業資源規劃學會，證書編號 GP0115533440</td></tr>
 <tr><td class="lbl">幹部</td><td>113 學年度資管系學會活動部部長；114-2 資管三B 副班代；115-1 資管四B 服務股長</td></tr>
-<tr><td class="lbl">比賽參加</td><td>Kaggle Playground S6E9；Kaggriculture（已提交並完成評分）；DrivenData 帕金森症挑戰；臺鐵數據力 2026 海選企劃</td></tr>
+<tr><td class="lbl">比賽參加</td><td>Kaggle Playground S6E9；Kaggriculture（已提交並完成評分）；DrivenData 帕金森症挑戰；臺鐵數據力 2026（民國 115 年）數據資料創意發想競賽（學生組），RailFlow-DSS 鐵道旅運負荷預測決策支援系統，2026/09 繳交海選企劃</td></tr>
 </table>
 """
 
@@ -486,7 +486,7 @@ def plan_compact(kind):
 <tr><td>5 分鐘內已完成再驗證</td><td><span class="allow">允許</span>，單據改為核准</td></tr>
 <tr><td>換成檢視者，即使完成再驗證</td><td><span class="deny">拒絕</span>，單據不變</td></tr>
 </table>
-<p>原型目前設定的高影響門檻是 300 件，再驗證有效期是 5 分鐘。做法：先寫好預期表並凍結答案；由預期表展開測試並接進 GitHub Actions；每次只改一處規則或程式來植入權限錯誤；24 項手寫測試和新測試跑同一批修改。比較時，手寫測試會先補成涵蓋預期表的同一組條件，當作對照組。預期表、測試產生程式和植入錯誤實驗要入學後才做。</p>
+<p>目前已經有的是原型、24 項測試和 CI。原型目前設定的高影響門檻是 300 件，再驗證有效期是 5 分鐘。做法：先寫好預期表並凍結答案；由預期表展開測試並接進 GitHub Actions；每次只改一處規則或程式來植入權限錯誤；24 項手寫測試和新測試跑同一批修改。比較時，手寫測試會先補成涵蓋預期表的同一組條件，當作對照組。預期表、測試產生程式和植入錯誤實驗要入學後才做。</p>
 {P(ERR_TYPE)}
 {P(FUTURE)}
 {H("畢業之後", "h3")}
@@ -602,12 +602,21 @@ docs.append(("ntou", "cs_other", "海大資工_其他有利審查資料_顧晉�
              wrap(f_n, k_n, "其他有利審查資料", other_html(include_works=False))))
 
 joined = "".join(d[6] for d in docs)
+mis_plan_html = next(d[6] for d in docs if d[1] == "mis_plan")
+assert "目前已經有的是原型、24 項測試和 CI" in mis_plan_html
+assert "入學後才做" in mis_plan_html
+if os.environ.get("ONLY"):
+    docs = [d for d in docs if d[1] == os.environ["ONLY"]]
 for bad in ["活動長", "Demand Sensing", "我習慣", "而是", "我會在分工", "看紀錄就知道",
             "公開分數 600", "公開分數600", "AI 工具使用揭露", "<a href",
-            "跨店拒絕", "跨店那筆", "同店／跨店", "因此要求再驗證", "不是"]:
+            "跨店拒絕", "跨店那筆", "同店／跨店", "因此要求再驗證", "不是", "而不只"]:
     assert bad not in joined, bad
 assert "活動部部長" in joined
+assert "113 學年度資管系學會活動部部長" in joined
 assert "ERP 規劃師" in joined and "GP0115533440" in joined
+assert "114 年 12 月" in joined
+assert "鐵道旅運負荷預測決策支援系統" in joined
+assert "而不只" not in joined
 assert "已提交並完成評分" in joined
 assert "超出帳號授權門市範圍" in joined
 assert "當作對照組" in joined
@@ -728,7 +737,10 @@ for item in docs:
     pdir = os.path.join(outdir, "pages")
     for old in os.listdir(pdir):
         if old.startswith(tag + "_"):
-            os.remove(os.path.join(pdir, old))
+            try:
+                os.remove(os.path.join(pdir, old))
+            except OSError:
+                pass
     for i, p in enumerate(d2):
         pix = p.get_pixmap(matrix=pymupdf.Matrix(1.4, 1.4), alpha=False)
         pix.save(os.path.join(pdir, f"{tag}_p{i+1:02d}.png"))
@@ -777,6 +789,8 @@ tr_names = {
         ("海大資工_歷年成績單_顧晉瑋.pdf", "ntou35_tr.pdf"),
     ],
 }
+if os.environ.get("ONLY"):
+    tr_names = {}
 for school, names in tr_names.items():
     outdir, store = SCHOOLS[school]
     for cn, ascii_n in names:
@@ -795,6 +809,8 @@ for school, (outdir, store) in SCHOOLS.items():
             try_copy(os.path.join(pdir, fn), os.path.join(spdir, fn), do_fsync=False)
     try_copy(__file__, os.path.join(outdir, "gen_five_r35.py"))
     try_copy(__file__, os.path.join(store, "gen_five_r35.py"), do_fsync=False)
+    if os.environ.get("ONLY"):
+        continue
     txt = "\n".join(sums[school]) + "\n"
     write_bytes(os.path.join(outdir, "SHA256SUMS.txt"), txt.encode())
     write_bytes(os.path.join(store, "SHA256SUMS.txt"), txt.encode(), do_fsync=False)

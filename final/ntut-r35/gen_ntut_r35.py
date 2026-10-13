@@ -259,7 +259,7 @@ def bio_html(why):
         ("比賽與幹部", [
             "比賽方面，我參加過 Kaggle Playground S6E9（公開分數 0.94540）和 DrivenData 帕金森症挑戰（公開分數 0.5591，指標是 log loss，越低越好）。Kaggriculture 已提交並完成評分。",
             "另外參加了臺鐵數據力 2026（民國 115 年）數據資料創意發想競賽（學生組），作品是 RailFlow-DSS 鐵道旅運負荷預測決策支援系統，2026/09 繳交海選企劃。",
-            "113 學年度擔任資管系學會活動部部長，負責規劃活動和跨年級協調。114-2 擔任資管三B 副班代。115-1 擔任資管四B 服務股長。",
+            "113 學年度資管系學會活動部部長，負責規劃活動和跨年級協調。114-2 擔任資管三B 副班代。115-1 擔任資管四B 服務股長。",
         ]),
         ("報考", why),
     ]
@@ -442,7 +442,7 @@ def build_html(kind):
 <table>
 <tr><th>項目</th><th>內容</th></tr>
 <tr><td class="lbl">程式與系統</td><td>程式語言 98、C 語言程式設計 96、程式設計 94、機器學習 93、系統分析與設計 83</td></tr>
-{"<tr><td class='lbl'>證照</td><td>2025 年 12 月（民國 114 年 12 月）ERP 規劃師，中華企業資源規劃學會，證書編號 " + kw("GP0115533440") + "</td></tr>" if kind != "sec" else ""}
+{"<tr><td class='lbl'>證照</td><td>民國 114 年 12 月取得 ERP 規劃師，中華企業資源規劃學會，證書編號 " + kw("GP0115533440") + "</td></tr>" if kind != "sec" else ""}
 </table>
 </div>
 """
@@ -468,7 +468,7 @@ def build_html(kind):
 {H("備審 E　其他")}
 <table>
 <tr><th>項目</th><th>內容</th></tr>
-<tr><td class="lbl">證照</td><td>2025 年 12 月（民國 114 年 12 月）ERP 規劃師，中華企業資源規劃學會，證書編號 {kw("GP0115533440")}</td></tr>
+<tr><td class="lbl">證照</td><td>民國 114 年 12 月取得 ERP 規劃師，中華企業資源規劃學會，證書編號 {kw("GP0115533440")}</td></tr>
 </table>
 <div class="scan"><img src="cert.jpg" alt="ERP 規劃師證書 GP0115533440"></div>
 """
@@ -521,10 +521,12 @@ joined = html_sec + html_cs
 for bad in ["活動長", "Demand Sensing", "我習慣", "而是", "我會在分工", "看紀錄就知道",
             "公開分數 600", "公開分數600", "AI 工具使用揭露", "<a href",
             "跨店拒絕", "跨店那筆", "同店／跨店", "因此要求再驗證",
-            "不是", "漸層", "box-shadow", "border-radius"]:
+            "不是", "而不只", "漸層", "box-shadow", "border-radius"]:
     assert bad not in joined, bad
 assert "活動部部長" in html_sec and "活動部部長" in html_cs
+assert "113 學年度資管系學會活動部部長" in html_sec
 assert "ERP 規劃師" in html_sec and "GP0115533440" in html_sec
+assert "114 年 12 月" in html_sec
 assert "已提交並完成評分" in html_sec
 assert "超出帳號授權門市範圍" in joined
 assert "當作對照組" in joined
@@ -668,7 +670,10 @@ for tag, dest, fname, ascii_name, n in results:
     pdir = os.path.join(OUT_DIR, "pages")
     for old in os.listdir(pdir):
         if old.startswith(tag + "_"):
-            os.remove(os.path.join(pdir, old))
+            try:
+                os.remove(os.path.join(pdir, old))
+            except OSError:
+                pass
     for i, p in enumerate(d):
         pix = p.get_pixmap(matrix=pymupdf.Matrix(1.55, 1.55), alpha=False)
         pix.save(os.path.join(pdir, f"{tag}_p{i+1:02d}.png"))
