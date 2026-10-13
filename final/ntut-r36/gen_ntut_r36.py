@@ -38,13 +38,21 @@ def kw(s):
     return f'<span class="kw">{nw(s)}</span>'
 
 
+def wrap_open(inner):
+    """Colour only the opening sentence so the eye lands there first. No new words."""
+    i = inner.find("。")
+    if i == -1:
+        return f'<p><span class="open">{inner}</span></p>'
+    return f'<p><span class="open">{inner[: i + 1]}</span>{inner[i + 1 :]}</p>'
+
+
 def P(s):
-    return f"<p>{nw(s)}</p>"
+    return wrap_open(nw(s))
 
 
 def Pk(s):
     """Paragraph whose keywords are already marked with kw()/nw()."""
-    return f"<p>{s}</p>"
+    return wrap_open(s)
 
 
 def H(s, tag="h2"):
@@ -65,41 +73,42 @@ html, body {
 }
 h1 {
   font-family: "Noto Sans CJK TC", sans-serif; font-weight: 700;
-  color: #1f3a5f; text-align: center; margin: 14px 0 4px 0; line-height: 1.3; font-size: 15pt;
+  color: #1a4550; text-align: center; margin: 14px 0 4px 0; line-height: 1.3; font-size: 15pt;
 }
 h2 {
   font-family: "Noto Sans CJK TC", sans-serif; font-weight: 700;
-  color: #1f3a5f; font-size: 11.6pt; border-bottom: 1.2pt solid #1f3a5f;
+  color: #1a4550; font-size: 11.6pt; border-bottom: 1.2pt solid #1a4550;
   padding: 0 0 4px 0; margin: 14px 0 8px 0;
 }
 h3 {
   font-family: "Noto Sans CJK TC", sans-serif; font-weight: 700;
-  color: #1f3a5f; font-size: 10.5pt; margin: 12px 0 5px 0;
+  color: #1a4550; font-size: 10.5pt; margin: 12px 0 5px 0;
 }
 p { margin: 0 0 9px 0; text-align: justify; }
+p .open { color: #1a4550; }
 .keep { page-break-inside: avoid; }
 .kicker { font-family: "Noto Sans CJK TC", sans-serif; font-size: 8.8pt; color: #5e5a55; text-align: center; margin: 0 0 3px 0; }
 .sub { font-family: "Noto Sans CJK TC", sans-serif; color: #5e5a55; text-align: center; font-size: 9pt; margin: 0 0 14px 0; }
 .nw { white-space: nowrap; }
-.kw { color: #1f3a5f; font-weight: 700; }
+.kw { color: #1a4550; font-weight: 700; }
 a { color: #1c2733; text-decoration: none; }
 thead { display: table-header-group; }
-p.refs { text-align: left; margin-bottom: 8px; font-size: 9.4pt; line-height: 1.55; }
-.num { font-weight: 700; color: #1f3a5f; }
+p.refs { text-align: left; margin-bottom: 8px; font-size: 9.4pt; line-height: 1.55; color: #1c2733; }
+.num { font-weight: 700; color: #1a4550; }
 table { border-collapse: collapse; width: 100%; margin: 0 0 14px 0; font-size: 9.5pt; }
 th {
-  background: #eef1f4; color: #1f3a5f;
+  background: #f2f3f3; color: #1c2733;
   font-family: "Noto Sans CJK TC", sans-serif; font-weight: 700;
   text-align: left; border: 0.6pt solid #c5cdd6; padding: 5px 8px;
 }
 td { border: 0.6pt solid #c5cdd6; padding: 5px 8px; vertical-align: top; }
 td.lbl, th.lbl { white-space: nowrap; width: 18%; }
 .okline {
-  font-family: "Noto Sans CJK TC", sans-serif; font-size: 9.2pt; color: #1f3a5f;
+  font-family: "Noto Sans CJK TC", sans-serif; font-size: 9.2pt; color: #1a4550;
   margin: 12px 0 0 0; padding-top: 8px; border-top: 0.6pt solid #c5cdd6;
 }
 code, pre { font-family: "DejaVu Sans Mono", monospace; font-size: 8.2pt; background: #f6f6f5; }
-pre { border-left: 2.5pt solid #1f3a5f; padding: 8px 12px; margin: 8px 0 12px 0; line-height: 1.5; }
+pre { border-left: 2.5pt solid #1a4550; padding: 8px 12px; margin: 8px 0 12px 0; line-height: 1.5; }
 .figs { display: flex; gap: 14px; margin: 8px 0 12px 0; }
 .figs figure { flex: 1; margin: 0; }
 .figs img { width: 100%; border: 0.6pt solid #c5cdd6; }
@@ -270,7 +279,7 @@ def bio_html(why):
             out.append('<p class="kicker">' + nw("自傳（續）　｜　顧晉瑋") + "</p>")
         out.append(H(title, "h3"))
         for p in paras:
-            out.append(f"<p>{mark_bio(p)}</p>")
+            out.append(wrap_open(mark_bio(p)))
     return "\n".join(out)
 
 
@@ -566,8 +575,11 @@ assert "比賽參與、幹部" not in html_sec
 html_flat = re.sub(r"\s+", "", html_plain)
 assert "班排名從30/40收到15/27" in html_flat
 assert "github.com/Miiduoa/retail-ops-dss" in joined
-assert "#1f3a5f" in joined
+assert "#1a4550" in joined
+assert "#1f3a5f" not in joined
 assert "#9b3b32" not in joined and "#2e6b4f" not in joined and "#9a6a12" not in joined
+assert "linear-gradient" not in joined and "#6b4" not in joined
+assert 'class="open"' in joined
 
 need = re.sub(r"<[^>]+>", "", joined)
 need += "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ　、。，．：；！？「」『』（）【】—－–…·／｜＋＝＊＆％＃＠～顧晉瑋北科資安資工甲組"
